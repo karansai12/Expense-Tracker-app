@@ -1,2 +1,2 @@
 # Expense-Tracker-app
-A simple project about Expense Tracker. Later, it converted to Zustand.
+A simple project about Tracking Expense. Later, it converted to Zustand.
