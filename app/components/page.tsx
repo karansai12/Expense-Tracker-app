@@ -25,8 +25,8 @@ import {
   ComboboxInput,
 } from "@/components/ui/combobox";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useExpenseStore } from "../store/expenseStore";
 
 interface Expense {
   name: string;
@@ -37,8 +37,13 @@ interface Expense {
 const categoriesList = ["food", "shopping", "travel", "bills"] as const;
 
 const ExpenseTracker = () => {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const {
+    expenses,
+    selectedCategories,
+    addExpense,
+    deleteExpense,
+    setSelectedCategories,
+  } = useExpenseStore();
 
   const { register, handleSubmit, setValue } = useForm<Expense>({
     defaultValues: {
@@ -49,21 +54,18 @@ const ExpenseTracker = () => {
   });
 
   const handleOnAdd = (data: Expense) => {
-    console.log({ data });
     if (!data.name || !data.price) return;
-    setExpenses((prev) => [
-      ...prev,
-      { name: data.name, price: data.price, category: data.category },
-    ]);
+    addExpense(data);
     setValue("name", "");
     setValue("price", 0);
   };
-  console.log({ expenses });
+
   const handleOnDelete = (index: number) => {
-    return setExpenses(expenses.filter((_, i) => i !== index));
+    return deleteExpense(index)
   };
+  
   const total = expenses.reduce((acc, item) => {
-    if (categories.length === 0 || categories.includes(item.category)) {
+    if (selectedCategories.length === 0 || selectedCategories.includes(item.category)) {
       return acc + item.price;
     } else {
       return acc;
@@ -76,7 +78,7 @@ const ExpenseTracker = () => {
     <div className="flex items-center justify-center w-full">
       <div className="flex flex-col gap-5">
         <h1 className="text-3xl items-center flex justify-center">
-          Expense Tracker 
+          Expense Tracker
         </h1>
         <div className="flex ">
           <form onSubmit={handleSubmit(handleOnAdd)}>
@@ -131,7 +133,7 @@ const ExpenseTracker = () => {
             autoHighlight
             items={categoriesList}
             defaultInputValue={[]}
-            onValueChange={(value:string[])=>setCategories(value)}
+            onValueChange={(value: string[]) => setSelectedCategories(value)}
           >
             <ComboboxChips ref={anchor} className="w-full">
               <ComboboxValue>
@@ -156,36 +158,36 @@ const ExpenseTracker = () => {
               </ComboboxList>
             </ComboboxContent>
           </Combobox>
-
         </div>
         <div>
           <h2 className="text-2xl text-red-300">Your total spending</h2>
           {expenses
             .filter((i) => {
-              if (categories.length === 0 || categories.includes(i.category)) {
+              if (selectedCategories.length === 0 || selectedCategories.includes(i.category)) {
                 return true;
               } else {
                 return false;
               }
             })
             .map((i, index) => (
-              
-                <><div key={index}>
-                        <li>
-                            name: {i.name}, price: ${i.price},category:{i.category}
-                        </li>
-                </div><div>
-                        <Button
-                            onClick={() => {
-                                handleOnDelete(index);
-                            } }
-                        >
-                            Delete
-                        </Button>
-                    </div></>
-              
+                <div key={index}>
+              <div>
+                  <li>
+                    name: {i.name}, price: ${i.price},category:{i.category}
+                  </li>
+                </div>
+                <div>
+                  <Button
+                    onClick={() => {
+                      handleOnDelete(index);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
             ))}
-          <div>Total:{total}</div>
+          <div>Total: ${total}</div>
         </div>
       </div>
     </div>

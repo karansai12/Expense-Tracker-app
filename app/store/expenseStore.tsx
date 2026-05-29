@@ -14,7 +14,21 @@ interface ExpenseStore {
   setSelectedCategories: (categories: string[]) => void;
 }
 
+
 export const useExpenseStore = create<ExpenseStore>((set) => ({
+  // state
   expenses: [],
   selectedCategories: [],
-}));
+
+  // actions
+  addExpense: (expense) =>
+    set((state) => ({ expenses: [...state.expenses, expense] })),
+
+  deleteExpense: (index) =>
+    set((state) => ({
+      expenses: state.expenses.filter((_, i) => i !== index)
+    })),
+
+  setSelectedCategories: (categories) =>
+    set({ selectedCategories: categories }),
+}))
