@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware" 
 
 interface Expense {
   name: string;
@@ -15,20 +16,25 @@ interface ExpenseStore {
 }
 
 
-export const useExpenseStore = create<ExpenseStore>((set) => ({
-  // state
-  expenses: [],
-  selectedCategories: [],
+export const useExpenseStore = create<ExpenseStore>()(
+  persist(                          
+    (set) => ({
+      expenses: [],
+      selectedCategories: [],
 
-  // actions
-  addExpense: (expense) =>
-    set((state) => ({ expenses: [...state.expenses, expense] })),
+      addExpense: (expense) =>
+        set((state) => ({ expenses: [...state.expenses, expense] })),
 
-  deleteExpense: (index) =>
-    set((state) => ({
-      expenses: state.expenses.filter((_, i) => i !== index)
-    })),
+      deleteExpense: (index) =>
+        set((state) => ({
+          expenses: state.expenses.filter((_, i) => i !== index),
+        })),
 
-  setSelectedCategories: (categories) =>
-    set({ selectedCategories: categories }),
-}))
+      setSelectedCategories: (categories) =>
+        set({ selectedCategories: categories }),
+    }),
+    {
+      name: "expense-storage",  // ← localStorage key name
+    }
+  )
+)
